@@ -237,7 +237,7 @@
 <body>
 
 <!-- SETUP SCREEN -->
-<div id="setup-screen">
+<div id="setup-screen" style="display:none;">
   <div class="setup-card">
     <div class="setup-logo">
       <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
@@ -473,6 +473,45 @@ async function loadRecords() {
     });
 }
 
+// ── SEED ROSTER ───────────────────────────────────────────
+const SEED_ROSTER = [
+  { id: 'f01', name: 'Skaggs', members: [
+    { id: 'f01m1', name: 'Anthony Skaggs', note: '' },
+    { id: 'f01m2', name: 'Taylor Skaggs',  note: '' },
+    { id: 'f01m3', name: 'Jackson Skaggs', note: '' },
+    { id: 'f01m4', name: 'Xander Skaggs',  note: '' },
+    { id: 'f01m5', name: 'Maddox Skaggs',  note: '' }
+  ]},
+  { id: 'f02', name: 'Mike / Kaitlyn', members: [
+    { id: 'f02m1', name: 'Mike',    note: '' },
+    { id: 'f02m2', name: 'Kaitlyn', note: '' },
+    { id: 'f02m3', name: 'Claire',  note: '' },
+    { id: 'f02m4', name: 'Logan',   note: '' }
+  ]},
+  { id: 'f03', name: 'Claire', members: [
+    { id: 'f03m1', name: 'Claire', note: '' },
+    { id: 'f03m2', name: 'Kaden',  note: '' },
+    { id: 'f03m3', name: 'Dawson', note: '' }
+  ]},
+  { id: 'f04', name: 'Saffner', members: [
+    { id: 'f04m1', name: 'Steve', note: '' },
+    { id: 'f04m2', name: 'Jana',  note: '' },
+    { id: 'f04m3', name: 'Seth',  note: '' }
+  ]},
+  { id: 'f05', name: 'Albergo', members: [
+    { id: 'f05m1', name: 'Guy',     note: '' },
+    { id: 'f05m2', name: 'Theresa', note: '' }
+  ]},
+  { id: 'f06', name: 'Roman / Nadya', members: [
+    { id: 'f06m1', name: 'Roman', note: '' },
+    { id: 'f06m2', name: 'Nadya', note: '' }
+  ]},
+  { id: 'f07', name: 'John / Joanne', members: [
+    { id: 'f07m1', name: 'John',   note: '' },
+    { id: 'f07m2', name: 'Joanne', note: '' }
+  ]}
+];
+
 // ── CONNECT & INITIAL LOAD ─────────────────────────────────
 async function connectAndLoad() {
   const url = v('setup-url');
@@ -484,6 +523,11 @@ async function connectAndLoad() {
   showLoading('Connecting to Google Sheets...');
   try {
     await loadRoster();
+    if (families.length === 0) {
+      families = JSON.parse(JSON.stringify(SEED_ROSTER));
+      showLoading('Writing roster to Google Sheets...');
+      await sheetPost({ action: 'saveRoster', families });
+    }
     await loadRecords();
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -499,27 +543,30 @@ async function connectAndLoad() {
 
 async function initApp() {
   const url = getScriptUrl();
-  if (!url) return; // show setup screen
+  if (!url) {
+    // No URL saved — show setup screen
+    document.getElementById('setup-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    return;
+  }
+  // URL already saved — skip setup, go straight to app
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  sv('settings-url', url);
   showLoading('Loading roster...');
   try {
     await loadRoster();
+    if (families.length === 0) {
+      families = JSON.parse(JSON.stringify(SEED_ROSTER));
+      await sheetPost({ action: 'saveRoster', families });
+    }
     await loadRecords();
-    document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    sv('settings-url', url);
-    document.getElementById('att-date').value = mostRecentSunday();
-    document.getElementById('att-date').addEventListener('change', renderAttendance);
-    renderAttendance();
   } catch(e) {
-    // if offline or error, still show app with whatever we have
-    document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    sv('settings-url', url);
-    document.getElementById('att-date').value = mostRecentSunday();
-    document.getElementById('att-date').addEventListener('change', renderAttendance);
-    renderAttendance();
-    setSyncStatus('err', 'Offline');
+    setSyncStatus('err', 'Offline — showing cached data');
   }
+  document.getElementById('att-date').value = mostRecentSunday();
+  document.getElementById('att-date').addEventListener('change', renderAttendance);
+  renderAttendance();
   hideLoading();
 }
 
