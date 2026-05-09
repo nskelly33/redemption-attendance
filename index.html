@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Redemption Church — Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black:       #18170f;
+    --dark:        #23221a;
+    --olive:       #7c7455;
+    --olive-mid:   #9e9265;
+    --olive-light: #c4b98a;
+    --olive-pale:  #f0ebe0;
+    --cream:       #f6f3ec;
+    --white:       #ffffff;
+    --mid:         #706e64;
+    --border:      rgba(124,116,85,0.18);
+    --border-med:  rgba(124,116,85,0.38);
+    --alert:       #8b3a2f;
+    --alert-bg:    #f9ede9;
+    --success:     #3a6440;
+    --success-bg:  #eaf3ea;
+    --info:        #2c5282;
+    --info-bg:     #ebf2fb;
+    --second:      #5a3e7a;
+    --second-bg:   #f0eaf8;
+    --font:        'Montserrat', system-ui, sans-serif;
+  }
+  html, body { background: var(--cream); font-family: var(--font); font-size: 14px; color: var(--black); min-height: 100vh; }
+
+  /* SETUP SCREEN */
+  #setup-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 24px;
+  }
+  .setup-card {
+    background: var(--white); border-radius: 8px; border-top: 3px solid var(--olive);
+    border: 1px solid var(--border); padding: 28px 28px 24px; width: 100%; max-width: 480px;
+  }
+  .setup-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  .setup-logo h1 { font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--black); }
+  .setup-logo p  { font-size: 10px; color: var(--mid); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+  .setup-card h2 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--black); }
+  .setup-card p  { font-size: 12px; color: var(--mid); line-height: 1.7; margin-bottom: 18px; font-weight: 400; }
+  .setup-card label { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); margin-bottom: 5px; }
+
+  /* MAIN APP — hidden until configured */
+  #app { display: none; }
+
+  /* HEADER */
+  .app-header {
+    background: var(--black); border-bottom: 3px solid var(--olive);
+    padding: 13px 16px; display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-title h1 { color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
+  .header-title p  { color: rgba(255,255,255,0.5); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+  .header-title    { flex: 1; }
+  .header-sync     { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; }
+  .header-sync.syncing { color: var(--olive-light); }
+  .header-sync.ok      { color: #7ec87e; }
+  .header-sync.err     { color: #e88; }
+
+  /* TABS */
+  .tab-bar {
+    background: var(--dark); display: flex; padding: 0 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    position: sticky; top: 55px; z-index: 40; overflow-x: auto;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    color: rgba(255,255,255,0.45); font-family: var(--font); font-size: 10px;
+    font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 11px 14px 9px; cursor: pointer; white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn:hover  { color: rgba(255,255,255,0.8); }
+  .tab-btn.active { color: #fff; border-bottom-color: var(--olive-light); }
+
+  /* PANELS */
+  .tab-panel { display: none; padding: 18px 16px 80px; max-width: 780px; margin: 0 auto; }
+  .tab-panel.active { display: block; }
+
+  /* LOADING OVERLAY */
+  .loading-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(24,23,15,0.6);
+    z-index: 100; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid rgba(196,185,138,0.3);
+    border-top-color: var(--olive-light); border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay p { color: var(--olive-light); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* SECTION LABEL */
+  .sec-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--olive); border-bottom: 1px solid var(--border); padding-bottom: 7px; margin-bottom: 14px;
+  }
+
+  /* STAT CARDS */
+  .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+  .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 11px; text-align: center; }
+  .stat-num  { font-size: 28px; font-weight: 300; color: var(--black); line-height: 1; margin-bottom: 4px; }
+  .stat-lbl  { font-size: 8px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); }
+
+  /* DATE ROW */
+  .date-row {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+    padding: 11px 14px; margin-bottom: 14px;
+  }
+  .date-row label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); }
+  .date-row input[type=date] { border: none; background: none; font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--black); outline: none; }
+
+  /* FAMILY BLOCKS */
+  .family-block { background: var(--white); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; overflow: hidden; }
+  .family-hd {
+    display: flex; align-items: center; gap: 10px; padding: 10px 13px;
+    background: var(--olive-pale); cursor: pointer; user-select: none;
+  }
+  .family-hd:hover { background: #e8e2d4; }
+  .fam-check { width: 18px; height: 18px; accent-color: var(--olive); cursor: pointer; flex-shrink: 0; }
+  .fam-name  { flex: 1; font-size: 13px; font-weight: 600; color: var(--black); }
+  .fam-count { font-size: 10px; font-weight: 500; color: var(--mid); }
+  .fam-chv   { color: var(--olive); font-size: 14px; transition: transform 0.2s; margin-left: 4px; }
+  .member-list { display: none; }
+  .member-row  { display: flex; align-items: center; gap: 10px; padding: 9px 13px 9px 34px; border-top: 1px solid var(--border); }
+  .mem-check   { width: 18px; height: 18px; accent-color: var(--olive); cursor: pointer; flex-shrink: 0; }
+  .mem-name    { flex: 1; font-size: 13px; color: var(--black); }
+  .mem-note    { font-size: 10px; color: var(--mid); font-style: italic; }
+  .del-btn     { background: none; border: none; color: rgba(139,58,47,0.3); cursor: pointer; font-size: 18px; padding: 2px 4px; line-height: 1; border-radius: 3px; }
+  .del-btn:hover { color: var(--alert); background: var(--alert-bg); }
+
+  /* GUEST SECTION */
+  .guest-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .guest-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .guest-type-card { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+  .guest-type-card.first-time  { border-top: 3px solid var(--info); }
+  .guest-type-card.second-time { border-top: 3px solid var(--second); }
+  .guest-type-hd   { margin-bottom: 9px; }
+  .guest-badge     { font-size: 8px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; }
+  .badge-first     { background: var(--info-bg);   color: var(--info);   }
+  .badge-second    { background: var(--second-bg); color: var(--second); }
+  .guest-rows      { display: flex; flex-direction: column; gap: 6px; }
+  .guest-row       { display: flex; gap: 6px; align-items: center; }
+  .guest-row input { flex: 1; min-width: 0; }
+  .untracked-row   {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 14px;
+  }
+  .untracked-row label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); flex: 1; }
+
+  /* ALERTS */
+  .alert-banner {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--alert-bg); border: 1px solid rgba(139,58,47,0.22);
+    border-left: 3px solid var(--alert); border-radius: 5px;
+    padding: 10px 12px; margin-bottom: 10px;
+  }
+  .alert-icon { color: var(--alert); flex-shrink: 0; margin-top: 1px; }
+  .alert-text strong { display: block; font-size: 9px; font-weight: 700; color: var(--alert); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
+  .alert-text span   { font-size: 12px; color: #7a3028; line-height: 1.5; font-weight: 400; }
+
+  /* BUTTONS */
+  .btn { font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 4px; padding: 10px 18px; border: none; transition: background 0.15s; }
+  .btn-primary { background: var(--olive); color: #fff; }
+  .btn-primary:hover { background: var(--black); }
+  .btn-outline  { background: none; color: var(--olive); border: 1px solid var(--border-med); }
+  .btn-outline:hover  { background: var(--olive-pale); }
+  .btn-danger   { background: var(--alert); color: #fff; }
+  .btn-danger:hover   { background: #6e2c23; }
+  .btn-sm { padding: 5px 10px; font-size: 9px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* INPUTS */
+  .rc-input { width: 100%; border: 1px solid var(--border-med); border-radius: 4px; padding: 9px 10px; font-family: var(--font); font-size: 13px; color: var(--black); background: var(--white); outline: none; }
+  .rc-input:focus { border-color: var(--olive); }
+  .num-input { width: 60px; text-align: center; border: 1px solid var(--border-med); border-radius: 4px; padding: 5px 6px; font-family: var(--font); font-size: 14px; background: var(--cream); color: var(--black); outline: none; }
+  .num-input:focus { border-color: var(--olive); }
+  .field-group { margin-bottom: 12px; }
+  .field-group label { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); margin-bottom: 4px; }
+
+  /* SAVE ROW */
+  .save-row { display: flex; gap: 10px; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .status-msg { font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
+  .status-msg.show { opacity: 1; }
+
+  /* HISTORY */
+  .history-entry { background: var(--white); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
+  .history-hd    { display: flex; align-items: center; padding: 10px 13px; background: var(--olive-pale); gap: 10px; flex-wrap: wrap; }
+  .history-date  { flex: 1; font-size: 13px; font-weight: 600; color: var(--black); min-width: 160px; }
+  .history-nums  { font-size: 11px; color: var(--mid); font-weight: 500; }
+  .history-body  { padding: 10px 13px; }
+  .chip-row      { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; margin-bottom: 8px; }
+  .chip          { font-size: 10px; font-weight: 500; padding: 2px 9px; border-radius: 10px; }
+  .chip-present  { background: var(--success-bg); color: var(--success); }
+  .chip-first    { background: var(--info-bg);    color: var(--info); }
+  .chip-second   { background: var(--second-bg);  color: var(--second); }
+  .chip-lbl      { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-top: 4px; }
+
+  /* METRICS */
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .metric-card  { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 14px; }
+  .metric-card h3 { font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--olive); margin-bottom: 12px; }
+  .bar-row   { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .bar-name  { width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-track { flex: 1; height: 7px; background: var(--olive-pale); border-radius: 4px; overflow: hidden; }
+  .bar-fill  { height: 100%; background: var(--olive); border-radius: 4px; }
+  .bar-val   { width: 30px; text-align: right; font-size: 10px; font-weight: 600; color: var(--mid); flex-shrink: 0; }
+
+  /* MODAL */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal { background: var(--white); border-radius: 8px; padding: 22px; width: 100%; max-width: 380px; border-top: 3px solid var(--olive); }
+  .modal h2 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+
+  .empty-state { text-align: center; padding: 36px 16px; color: var(--mid); font-size: 12px; font-weight: 500; }
+  .info-notice { background: var(--olive-pale); border: 1px solid var(--border-med); border-left: 3px solid var(--olive); border-radius: 5px; padding: 10px 13px; margin-bottom: 14px; font-size: 11px; color: var(--dark); line-height: 1.7; font-weight: 400; }
+  .info-notice strong { font-weight: 700; }
+
+  @media (max-width: 500px) {
+    .guest-type-grid { grid-template-columns: 1fr; }
+    .metrics-grid    { grid-template-columns: 1fr; }
+    .tab-btn { padding: 11px 10px 9px; font-size: 9px; letter-spacing: 0.1em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="17" r="14.5" stroke="#7c7455" stroke-width="1.3" fill="none"/>
+        <line x1="17" y1="5" x2="17" y2="29" stroke="#7c7455" stroke-width="1.8"/>
+        <line x1="9"  y1="12" x2="25" y2="12" stroke="#7c7455" stroke-width="1.8"/>
+      </svg>
+      <div>
+        <div class="setup-logo h1" style="font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--black);">Redemption Church</div>
+        <div style="font-size:10px;color:var(--mid);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;">Attendance Tracker</div>
+      </div>
+    </div>
+    <h2>Connect to Google Sheets</h2>
+    <p>Paste your Apps Script Web App URL to get started. This only needs to be done once on each device.</p>
+    <div class="field-group">
+      <label>Apps Script Web App URL</label>
+      <input class="rc-input" id="setup-url" placeholder="https://script.google.com/macros/s/.../exec" />
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="connectAndLoad()">Connect & Load Roster</button>
+    <div id="setup-error" style="font-size:11px;color:var(--alert);margin-top:10px;font-weight:600;min-height:16px;"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header class="app-header">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="flex-shrink:0;">
+      <circle cx="16" cy="16" r="13.5" stroke="rgba(255,255,255,0.35)" stroke-width="1.2" fill="none"/>
+      <line x1="16" y1="5"  x2="16" y2="27" stroke="rgba(255,255,255,0.85)" stroke-width="1.7"/>
+      <line x1="8"  y1="11" x2="24" y2="11" stroke="rgba(255,255,255,0.85)" stroke-width="1.7"/>
+    </svg>
+    <div class="header-title">
+      <h1>Redemption Church</h1>
+      <p>Wesley Chapel, FL</p>
+    </div>
+    <span class="header-sync" id="sync-status"></span>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('attendance',this)">Attendance</button>
+    <button class="tab-btn"        onclick="switchTab('roster',this)">Roster</button>
+    <button class="tab-btn"        onclick="switchTab('history',this)">History</button>
+    <button class="tab-btn"        onclick="switchTab('metrics',this)">Metrics</button>
+    <button class="tab-btn"        onclick="switchTab('settings',this)">Settings</button>
+  </nav>
+
+  <!-- ATTENDANCE -->
+  <section id="panel-attendance" class="tab-panel active">
+    <div id="absence-alerts"></div>
+    <div class="date-row">
+      <label>Sunday</label>
+      <input type="date" id="att-date" />
+    </div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-num" id="stat-present">0</div><div class="stat-lbl">Present</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-roster">0</div><div class="stat-lbl">Roster</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
+    </div>
+    <div class="sec-label">Family Roster</div>
+    <div id="att-family-list"></div>
+    <div class="guest-section">
+      <div class="sec-label" style="margin-bottom:12px;">Guest Tracking</div>
+      <div class="guest-type-grid">
+        <div class="guest-type-card first-time">
+          <div class="guest-type-hd"><span class="guest-badge badge-first">First Time</span></div>
+          <div id="first-time-rows" class="guest-rows"></div>
+          <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addGuestRow('first-time-rows')">+ Add</button>
+        </div>
+        <div class="guest-type-card second-time">
+          <div class="guest-type-hd"><span class="guest-badge badge-second">Second Time</span></div>
+          <div id="second-time-rows" class="guest-rows"></div>
+          <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addGuestRow('second-time-rows')">+ Add</button>
+        </div>
+      </div>
+      <div class="untracked-row" style="margin-top:10px;">
+        <label>Additional untracked</label>
+        <input type="number" class="num-input" id="extra-count" min="0" value="0" oninput="updateStats()" />
+      </div>
+    </div>
+    <div class="save-row">
+      <button class="btn btn-primary" id="save-btn" onclick="saveAttendance()">Save Attendance</button>
+      <span class="status-msg" id="save-status"></span>
+    </div>
+  </section>
+
+  <!-- ROSTER -->
+  <section id="panel-roster" class="tab-panel">
+    <div class="info-notice">Changes to the roster are saved directly to your Google Sheet and will appear for anyone using this app.</div>
+    <div class="sec-label">Families & Members</div>
+    <div id="roster-family-list"></div>
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+      <div class="sec-label">Add New Family</div>
+      <div style="display:flex;gap:8px;">
+        <input class="rc-input" id="new-fam-input" placeholder="Family name (e.g. Johnson Family)" style="max-width:300px;" onkeydown="if(event.key==='Enter')addFamily()" />
+        <button class="btn btn-primary" onclick="addFamily()">Add</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="panel-history" class="tab-panel">
+    <div class="info-notice"><strong>History is loaded live from your Google Sheet.</strong> Every saved service appears here.</div>
+    <div class="sec-label">Attendance Records</div>
+    <div id="history-list"></div>
+  </section>
+
+  <!-- METRICS -->
+  <section id="panel-metrics" class="tab-panel">
+    <div class="sec-label">Attendance Metrics</div>
+    <div id="metrics-area"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="panel-settings" class="tab-panel">
+    <div class="sec-label">Settings</div>
+    <div class="info-notice">Your Apps Script URL is saved on this device. To use the app on a new device, open this page and paste the URL again.</div>
+    <div class="field-group" style="margin-top:4px;">
+      <label>Apps Script Web App URL</label>
+      <input class="rc-input" id="settings-url" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveSettingsUrl()" />
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()">Export CSV</button>
+      <button class="btn btn-outline btn-sm" onclick="resetDevice()">Disconnect This Device</button>
+    </div>
+  </section>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <p id="loading-msg">Loading...</p>
+</div>
+
+<!-- MODAL HOST -->
+<div id="modal-host"></div>
+
+<script>
+const URL_KEY = 'rc_script_url';
+
+// In-memory state (always loaded fresh from Sheet)
+let families = [];
+let records  = [];
+
+// ── UTILITIES ──────────────────────────────────────────────
+function uid()   { return '_' + Math.random().toString(36).slice(2,10); }
+function today() { return new Date().toISOString().split('T')[0]; }
+function v(id)   { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function sv(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function mostRecentSunday() {
+  const d = new Date(); d.setDate(d.getDate() - d.getDay());
+  return d.toISOString().split('T')[0];
+}
+function fmtDate(iso) {
+  return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+}
+function getScriptUrl() { return localStorage.getItem(URL_KEY) || ''; }
+
+function showLoading(msg) {
+  document.getElementById('loading-msg').textContent = msg || 'Loading...';
+  document.getElementById('loading').classList.add('show');
+}
+function hideLoading() { document.getElementById('loading').classList.remove('show'); }
+
+function setSyncStatus(state, msg) {
+  const el = document.getElementById('sync-status');
+  el.className = 'header-sync ' + state;
+  el.textContent = msg;
+}
+
+// ── SHEET API ──────────────────────────────────────────────
+async function sheetGet(action) {
+  const url = getScriptUrl();
+  if (!url) return null;
+  const resp = await fetch(url + '?action=' + action);
+  return resp.json();
+}
+
+async function sheetPost(payload) {
+  const url = getScriptUrl();
+  if (!url) return null;
+  const resp = await fetch(url, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  // no-cors returns opaque response — assume ok
+  return { status: 'ok' };
+}
+
+// ── LOAD ROSTER FROM SHEET ─────────────────────────────────
+async function loadRoster() {
+  const data = await sheetGet('getRoster');
+  if (!data || !data.rows || data.rows.length < 2) return;
+  // rows: [FamilyID, FamilyName, MemberID, MemberName, Note]
+  const famMap = {};
+  data.rows.slice(1).forEach(row => {
+    const [famId, famName, memId, memName, note] = row;
+    if (!famId) return;
+    if (!famMap[famId]) famMap[famId] = { id: String(famId), name: String(famName), members: [] };
+    if (memId) famMap[famId].members.push({ id: String(memId), name: String(memName), note: String(note||'') });
+  });
+  families = Object.values(famMap);
+}
+
+// ── LOAD RECORDS FROM SHEET ────────────────────────────────
+async function loadRecords() {
+  const data = await sheetGet('getRecords');
+  if (!data || !data.rows || data.rows.length < 2) return;
+  // Sheet cols: Timestamp | Date | Total Attendance | Roster Present | First Time | Second Time | First Time Names | Second Time Names | Present Members
+  records = data.rows.slice(1)
+    .filter(row => row[1])
+    .map(row => {
+      const presentRaw = String(row[8]||'');
+      const present = presentRaw === 'none' ? [] : presentRaw.split(',').map(s=>s.trim()).filter(Boolean);
+      const parseGuests = str => {
+        if (!str || str === 'none') return [];
+        return String(str).split(',').map(s => {
+          const m = s.trim().match(/^(.*?)(?:\s*\((.*)\))?$/);
+          return { name: m ? m[1].trim() : s.trim(), note: m && m[2] ? m[2].trim() : '' };
+        }).filter(g => g.name);
+      };
+      return {
+        date: String(row[1]).trim(),
+        totalAttendance: Number(row[2])||0,
+        rosterPresent: Number(row[3])||0,
+        firstGuests:  parseGuests(row[6]),
+        secondGuests: parseGuests(row[7]),
+        presentNames: present,
+        extra: 0
+      };
+    });
+}
+
+// ── CONNECT & INITIAL LOAD ─────────────────────────────────
+async function connectAndLoad() {
+  const url = v('setup-url');
+  if (!url || !url.includes('script.google.com')) {
+    document.getElementById('setup-error').textContent = 'Please paste a valid Apps Script URL.';
+    return;
+  }
+  localStorage.setItem(URL_KEY, url);
+  showLoading('Connecting to Google Sheets...');
+  try {
+    await loadRoster();
+    await loadRecords();
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    sv('settings-url', url);
+    document.getElementById('att-date').value = mostRecentSunday();
+    document.getElementById('att-date').addEventListener('change', renderAttendance);
+    renderAttendance();
+  } catch(e) {
+    document.getElementById('setup-error').textContent = 'Could not connect. Check the URL and try again.';
+  }
+  hideLoading();
+}
+
+async function initApp() {
+  const url = getScriptUrl();
+  if (!url) return; // show setup screen
+  showLoading('Loading roster...');
+  try {
+    await loadRoster();
+    await loadRecords();
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    sv('settings-url', url);
+    document.getElementById('att-date').value = mostRecentSunday();
+    document.getElementById('att-date').addEventListener('change', renderAttendance);
+    renderAttendance();
+  } catch(e) {
+    // if offline or error, still show app with whatever we have
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    sv('settings-url', url);
+    document.getElementById('att-date').value = mostRecentSunday();
+    document.getElementById('att-date').addEventListener('change', renderAttendance);
+    renderAttendance();
+    setSyncStatus('err', 'Offline');
+  }
+  hideLoading();
+}
+
+// ── TABS ───────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'attendance') renderAttendance();
+  if (name === 'roster')     renderRoster();
+  if (name === 'history')    renderHistoryTab();
+  if (name === 'metrics')    renderMetrics();
+  if (name === 'settings')   sv('settings-url', getScriptUrl());
+}
+
+// ── ABSENCE ALERTS ─────────────────────────────────────────
+function getAbsenceAlerts() {
+  const sorted = [...records].sort((a,b) => b.date.localeCompare(a.date));
+  if (sorted.length < 3) return [];
+  const last3 = sorted.slice(0, 3);
+  const alerts = [];
+  families.forEach(fam => {
+    fam.members.forEach(mem => {
+      const absentAll = last3.every(rec => !rec.presentNames.includes(mem.name));
+      if (absentAll) alerts.push({ name: mem.name, family: fam.name });
+    });
+  });
+  return alerts;
+}
+
+// ── ATTENDANCE TAB ─────────────────────────────────────────
+function renderAttendance() {
+  document.getElementById('absence-alerts').innerHTML = getAbsenceAlerts().map(a => `
+    <div class="alert-banner">
+      <span class="alert-icon">&#9888;</span>
+      <div class="alert-text"><strong>Absence Alert</strong>
+      <span>${escH(a.name)} (${escH(a.family)}) has missed the last 3 services.</span></div>
+    </div>`).join('');
+
+  const list = document.getElementById('att-family-list');
+  if (!families.length) {
+    list.innerHTML = '<div class="empty-state">No families yet — add them in the Roster tab.</div>';
+    updateStats(); return;
+  }
+  list.innerHTML = families.map(fam => {
+    const total = fam.members.length;
+    return `<div class="family-block">
+      <div class="family-hd" onclick="togglePanel(event,'att-${fam.id}')">
+        <input type="checkbox" class="fam-check" id="fc-${fam.id}" data-famid="${fam.id}"
+          onclick="toggleFamilyAll(event,'${fam.id}')" />
+        <span class="fam-name">${escH(fam.name)}</span>
+        <span class="fam-count">${total} member${total!==1?'s':''}</span>
+        <span class="fam-chv" id="chv-att-${fam.id}">&#x203A;</span>
+      </div>
+      <div class="member-list" id="att-${fam.id}">
+        ${fam.members.map(mem => `<div class="member-row">
+          <input type="checkbox" class="mem-check" data-fam="${fam.id}" data-mid="${mem.id}" data-name="${escH(mem.name)}"
+            onchange="syncFamCheck('${fam.id}');updateStats();" />
+          <span class="mem-name">${escH(mem.name)}</span>
+          ${mem.note ? `<span class="mem-note">${escH(mem.note)}</span>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('extra-count').oninput = updateStats;
+  updateStats();
+}
+
+function togglePanel(e, id) {
+  if (e.target.tagName === 'INPUT') return;
+  const el = document.getElementById(id), chv = document.getElementById('chv-' + id);
+  const open = el.style.display === 'block';
+  el.style.display = open ? 'none' : 'block';
+  if (chv) chv.style.transform = open ? '' : 'rotate(90deg)';
+}
+function toggleFamilyAll(e, famId) {
+  e.stopPropagation();
+  document.querySelectorAll(`.mem-check[data-fam="${famId}"]`).forEach(cb => cb.checked = e.target.checked);
+  updateStats();
+}
+function syncFamCheck(famId) {
+  const cbs = [...document.querySelectorAll(`.mem-check[data-fam="${famId}"]`)];
+  const n = cbs.filter(c => c.checked).length;
+  const fcb = document.getElementById('fc-' + famId); if (!fcb) return;
+  fcb.checked = n === cbs.length; fcb.indeterminate = n > 0 && n < cbs.length;
+}
+function updateStats() {
+  let present = 0, roster = 0;
+  document.querySelectorAll('.mem-check').forEach(cb => { roster++; if (cb.checked) present++; });
+  const extra   = parseInt(document.getElementById('extra-count')?.value) || 0;
+  const first   = document.querySelectorAll('#first-time-rows .guest-row').length;
+  const second  = document.querySelectorAll('#second-time-rows .guest-row').length;
+  document.getElementById('stat-present').textContent = present;
+  document.getElementById('stat-roster').textContent  = roster;
+  document.getElementById('stat-total').textContent   = present + first + second + extra;
+}
+function addGuestRow(containerId, name, note) {
+  const c = document.getElementById(containerId); if (!c) return;
+  const id = uid(); const row = document.createElement('div');
+  row.className = 'guest-row'; row.id = id;
+  row.innerHTML = `<input class="rc-input" placeholder="Name" style="max-width:140px;" value="${escH(name||'')}" />
+    <input class="rc-input" placeholder="Note" value="${escH(note||'')}" />
+    <button class="del-btn" onclick="document.getElementById('${id}').remove();updateStats();">&#x2715;</button>`;
+  c.appendChild(row); updateStats();
+}
+function getGuestRows(cid) {
+  return [...document.querySelectorAll('#' + cid + ' .guest-row')].map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { name: inputs[0].value.trim() || 'Unknown Guest', note: inputs[1].value.trim() };
+  });
+}
+
+async function saveAttendance() {
+  const date = document.getElementById('att-date').value;
+  if (!date) { alert('Please select a date.'); return; }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  setSyncStatus('syncing', 'Saving...');
+
+  const presentNames = [...document.querySelectorAll('.mem-check:checked')].map(cb => cb.dataset.name);
+  const firstGuests  = getGuestRows('first-time-rows');
+  const secondGuests = getGuestRows('second-time-rows');
+  const extra        = parseInt(document.getElementById('extra-count')?.value) || 0;
+  const tot = presentNames.length + firstGuests.length + secondGuests.length + extra;
+
+  const fn = firstGuests.map(g  => g.name + (g.note ? ' (' + g.note + ')' : '')).join(', ');
+  const sn = secondGuests.map(g => g.name + (g.note ? ' (' + g.note + ')' : '')).join(', ');
+
+  const payload = {
+    action: 'saveAttendance',
+    date, totalAttendance: tot, rosterPresent: presentNames.length,
+    firstTimeGuests: firstGuests.length, secondTimeGuests: secondGuests.length,
+    firstTimerNames: fn || 'none', secondTimerNames: sn || 'none',
+    presentMembers: presentNames.join(', ') || 'none'
+  };
+
+  try {
+    await sheetPost(payload);
+    // update local records cache
+    const newRec = { date, totalAttendance: tot, rosterPresent: presentNames.length,
+      firstGuests, secondGuests, presentNames, extra };
+    const idx = records.findIndex(r => r.date === date);
+    if (idx >= 0) records[idx] = newRec; else records.push(newRec);
+
+    const sm = document.getElementById('save-status');
+    sm.style.color = 'var(--success)'; sm.textContent = '✓ Saved to Google Sheet';
+    sm.classList.add('show'); setTimeout(() => sm.classList.remove('show'), 3000);
+    setSyncStatus('ok', '✓ Synced');
+    setTimeout(() => setSyncStatus('', ''), 3000);
+  } catch(e) {
+    const sm = document.getElementById('save-status');
+    sm.style.color = 'var(--alert)'; sm.textContent = 'Error — check connection';
+    sm.classList.add('show'); setTimeout(() => sm.classList.remove('show'), 4000);
+    setSyncStatus('err', 'Error');
+  }
+  btn.disabled = false;
+}
+
+// ── ROSTER TAB ─────────────────────────────────────────────
+function renderRoster() {
+  const list = document.getElementById('roster-family-list');
+  if (!families.length) { list.innerHTML = '<div class="empty-state">No families yet.</div>'; return; }
+  list.innerHTML = families.map(fam => `
+    <div class="family-block" style="margin-bottom:8px;">
+      <div class="family-hd" onclick="togglePanel(event,'ros-${fam.id}')">
+        <span class="fam-name">${escH(fam.name)}</span>
+        <span class="fam-count">${fam.members.length} member${fam.members.length!==1?'s':''}</span>
+        <button class="btn btn-outline btn-sm" style="margin-right:5px;" onclick="event.stopPropagation();openAddMemberModal('${fam.id}')">+ Member</button>
+        <button class="btn btn-danger  btn-sm" onclick="event.stopPropagation();deleteFamilyConfirm('${fam.id}')">Remove</button>
+        <span class="fam-chv" id="chv-ros-${fam.id}">&#x203A;</span>
+      </div>
+      <div class="member-list" id="ros-${fam.id}">
+        ${fam.members.length ? fam.members.map(mem => `<div class="member-row">
+          <span class="mem-name">${escH(mem.name)}</span>
+          ${mem.note ? `<span class="mem-note">${escH(mem.note)}</span>` : ''}
+          <button class="del-btn" onclick="deleteMember('${fam.id}','${mem.id}')">&#x2715;</button>
+        </div>`).join('')
+        : '<div style="padding:10px 13px 10px 34px;font-size:11px;color:var(--mid);">No members yet.</div>'}
+      </div>
+    </div>`).join('');
+}
+
+async function addFamily() {
+  const input = document.getElementById('new-fam-input');
+  const name = input.value.trim(); if (!name) return;
+  const fam = { id: uid(), name, members: [] };
+  families.push(fam);
+  input.value = '';
+  renderRoster();
+  await syncRoster('Adding family...');
+}
+
+async function deleteFamilyConfirm(famId) {
+  const fam = families.find(f => f.id === famId); if (!fam) return;
+  if (!confirm(`Remove "${fam.name}" and all their members?`)) return;
+  families = families.filter(f => f.id !== famId);
+  renderRoster();
+  await syncRoster('Removing family...');
+}
+
+async function deleteMember(famId, memId) {
+  const fam = families.find(f => f.id === famId); if (!fam) return;
+  if (!confirm('Remove this member?')) return;
+  fam.members = fam.members.filter(m => m.id !== memId);
+  renderRoster();
+  await syncRoster('Removing member...');
+}
+
+function openAddMemberModal(famId) {
+  const fam = families.find(f => f.id === famId);
+  document.getElementById('modal-host').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h2>Add Member — ${escH(fam.name)}</h2>
+        <div class="field-group"><label>Name</label><input class="rc-input" id="m-name" placeholder="First and last name" /></div>
+        <div class="field-group"><label>Note (optional)</label><input class="rc-input" id="m-note" placeholder="e.g. regular visitor" /></div>
+        <div class="modal-btns">
+          <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveMember('${famId}')">Add Member</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(() => { const el = document.getElementById('m-name'); if (el) el.focus(); }, 60);
+}
+
+async function saveMember(famId) {
+  const name = v('m-name'); if (!name) return;
+  const fam = families.find(f => f.id === famId); if (!fam) return;
+  fam.members.push({ id: uid(), name, note: v('m-note') });
+  closeModal(); renderRoster();
+  await syncRoster('Saving member...');
+}
+
+async function syncRoster(msg) {
+  showLoading(msg || 'Syncing roster...');
+  setSyncStatus('syncing', 'Saving...');
+  try {
+    await sheetPost({ action: 'saveRoster', families });
+    setSyncStatus('ok', '✓ Synced');
+    setTimeout(() => setSyncStatus('', ''), 2500);
+  } catch(e) {
+    setSyncStatus('err', 'Sync error');
+  }
+  hideLoading();
+}
+
+function closeModal() { document.getElementById('modal-host').innerHTML = ''; }
+
+// ── HISTORY TAB ────────────────────────────────────────────
+function renderHistoryTab() {
+  const el = document.getElementById('history-list');
+  if (!records.length) { el.innerHTML = '<div class="empty-state">No records yet.</div>'; return; }
+  el.innerHTML = [...records].sort((a,b) => b.date.localeCompare(a.date)).map(rec => {
+    const tot = rec.totalAttendance || (rec.presentNames.length + (rec.firstGuests||[]).length + (rec.secondGuests||[]).length + (rec.extra||0));
+    const pChips  = (rec.presentNames||[]).map(n => `<span class="chip chip-present">${escH(n)}</span>`).join('');
+    const f1Chips = (rec.firstGuests||[]).map(g  => `<span class="chip chip-first">${escH(g.name)}${g.note?' — '+escH(g.note):''}</span>`).join('');
+    const f2Chips = (rec.secondGuests||[]).map(g => `<span class="chip chip-second">${escH(g.name)}${g.note?' — '+escH(g.note):''}</span>`).join('');
+    return `<div class="history-entry">
+      <div class="history-hd">
+        <span class="history-date">${fmtDate(rec.date)}</span>
+        <span class="history-nums">${rec.rosterPresent||0} roster &nbsp;·&nbsp; <strong>${tot} total</strong></span>
+      </div>
+      <div class="history-body">
+        ${pChips  ? `<div class="chip-lbl">Present</div><div class="chip-row">${pChips}</div>` : ''}
+        ${f1Chips ? `<div class="chip-lbl">First Time Guests</div><div class="chip-row">${f1Chips}</div>` : ''}
+        ${f2Chips ? `<div class="chip-lbl">Second Time Guests</div><div class="chip-row">${f2Chips}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── METRICS TAB ────────────────────────────────────────────
+function renderMetrics() {
+  const el = document.getElementById('metrics-area');
+  if (!records.length) { el.innerHTML = '<div class="empty-state">No records yet.</div>'; return; }
+  const total   = records.length;
+  const avgTot  = Math.round(records.reduce((a,r) => a + (r.totalAttendance||0), 0) / total);
+  const avgRost = Math.round(records.reduce((a,r) => a + (r.rosterPresent||0), 0) / total);
+  const totF    = records.reduce((a,r) => a + (r.firstGuests||[]).length, 0);
+  const totS    = records.reduce((a,r) => a + (r.secondGuests||[]).length, 0);
+  const alerts  = getAbsenceAlerts();
+
+  // member attendance count by name
+  const cnt = {};
+  families.forEach(f => f.members.forEach(m => { cnt[m.name] = 0; }));
+  records.forEach(r => (r.presentNames||[]).forEach(n => { if (n in cnt) cnt[n]++; }));
+  const top = Object.entries(cnt).map(([name,c]) => ({ name, c, pct: Math.round(c/total*100) }))
+    .sort((a,b) => b.c - a.c).slice(0, 10);
+
+  const recent = [...records].sort((a,b) => a.date.localeCompare(b.date)).slice(-8);
+  const maxT   = Math.max(...recent.map(r => r.totalAttendance||0), 1);
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;">
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Services</div></div>
+      <div class="stat-card"><div class="stat-num">${avgTot}</div><div class="stat-lbl">Avg Total</div></div>
+      <div class="stat-card"><div class="stat-num">${avgRost}</div><div class="stat-lbl">Avg Roster</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:${alerts.length?'var(--alert)':'var(--success)'};">${alerts.length}</div><div class="stat-lbl">Absence Alerts</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div class="stat-card"><div class="stat-num" style="color:var(--info);">${totF}</div><div class="stat-lbl">Total 1st-Timers</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--second);">${totS}</div><div class="stat-lbl">Total 2nd-Timers</div></div>
+    </div>
+    ${alerts.length ? `<div style="margin-bottom:16px;"><div class="sec-label">3-Week Absence Alerts</div>${alerts.map(a=>`<div class="alert-banner"><span class="alert-icon">&#9888;</span><div class="alert-text"><strong>Follow Up</strong><span>${escH(a.name)} — ${escH(a.family)}</span></div></div>`).join('')}</div>` : ''}
+    <div class="metrics-grid">
+      <div class="metric-card"><h3>Attendance Rate</h3>${top.map(m=>`<div class="bar-row"><span class="bar-name" title="${escH(m.name)}">${escH(m.name)}</span><div class="bar-track"><div class="bar-fill" style="width:${m.pct}%"></div></div><span class="bar-val">${m.pct}%</span></div>`).join('')}</div>
+      <div class="metric-card"><h3>Recent Totals</h3>${recent.map(r=>{ const t=r.totalAttendance||0; const d=new Date(r.date+'T12:00:00'); return `<div class="bar-row"><span class="bar-name">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(t/maxT*100)}%"></div></div><span class="bar-val">${t}</span></div>`; }).join('')}</div>
+    </div>`;
+}
+
+// ── SETTINGS ───────────────────────────────────────────────
+function saveSettingsUrl() { localStorage.setItem(URL_KEY, v('settings-url')); }
+
+function resetDevice() {
+  if (!confirm('Disconnect this device? You will need to paste the URL again to reconnect.')) return;
+  localStorage.removeItem(URL_KEY);
+  location.reload();
+}
+
+function exportCSV() {
+  if (!records.length) { alert('No records to export.'); return; }
+  const rows = [['Date','Total Attendance','Roster Present','First Time Guests','Second Time Guests','First Timer Names','Second Timer Names','Present Members']];
+  [...records].sort((a,b) => a.date.localeCompare(b.date)).forEach(rec => {
+    const fn = (rec.firstGuests||[]).map(g=>g.name+(g.note?' ('+g.note+')':'')).join('; ');
+    const sn = (rec.secondGuests||[]).map(g=>g.name+(g.note?' ('+g.note+')':'')).join('; ');
+    rows.push([rec.date, rec.totalAttendance||0, rec.rosterPresent||0, (rec.firstGuests||[]).length, (rec.secondGuests||[]).length, fn||'', sn||'', (rec.presentNames||[]).join('; ')||'']);
+  });
+  const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'RedemptionAttendance_' + today() + '.csv'; a.click();
+}
+
+// ── INIT ───────────────────────────────────────────────────
+initApp();
+</script>
+</body>
+</html>
