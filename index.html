@@ -414,11 +414,11 @@ async function loadRoster() {
 async function loadRecords() {
   const data = await sheetGet('getRecords');
   if (!data || !data.rows || data.rows.length < 2) return;
-  // Sheet cols: Timestamp | Date | Total Attendance | Roster Present | First Time | Second Time | First Time Names | Second Time Names | Present Members
+  // Sheet cols: A(0):Date | B(1):Total Attendance | C(2):Roster Attendance | D(3):First Time | E(4):Second Time | F(5):First Time Notes | G(6):Second Time Notes | H(7):Present Members | I(8):Time Submitted | J(9):Additional Comments
   records = data.rows.slice(1)
-    .filter(row => row[1])
+    .filter(row => row[0])
     .map(row => {
-      const presentRaw = String(row[8]||'');
+      const presentRaw = String(row[7]||'');
       const present = presentRaw === 'none' ? [] : presentRaw.split(',').map(s=>s.trim()).filter(Boolean);
       const parseGuests = str => {
         if (!str || str === 'none') return [];
@@ -428,13 +428,14 @@ async function loadRecords() {
         }).filter(g => g.name);
       };
       return {
-        date: String(row[1]).trim(),
-        totalAttendance: Number(row[2])||0,
-        rosterPresent: Number(row[3])||0,
-        firstGuests:  parseGuests(row[6]),
-        secondGuests: parseGuests(row[7]),
+        date: String(row[0]).trim(),
+        totalAttendance: Number(row[1])||0,
+        rosterPresent: Number(row[2])||0,
+        firstGuests:  parseGuests(row[5]),
+        secondGuests: parseGuests(row[6]),
         presentNames: present,
-        extra: 0
+        extra: 0,
+        additionalComments: String(row[9]||'')
       };
     });
 }
