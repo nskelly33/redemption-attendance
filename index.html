@@ -32,8 +32,10 @@
   }
   html, body { background: var(--cream); font-family: var(--font); font-size: 14px; color: var(--black); min-height: 100vh; }
 
+  /* MAIN APP — hidden until configured */
   #app { display: none; }
 
+  /* HEADER */
   .app-header {
     background: var(--black); border-bottom: 3px solid var(--olive);
     padding: 13px 16px; display: flex; align-items: center; gap: 12px;
@@ -47,6 +49,7 @@
   .header-sync.ok      { color: #7ec87e; }
   .header-sync.err     { color: #e88; }
 
+  /* TABS */
   .tab-bar {
     background: var(--dark); display: flex; padding: 0 16px;
     border-bottom: 1px solid rgba(255,255,255,0.07);
@@ -63,9 +66,11 @@
   .tab-btn:hover  { color: rgba(255,255,255,0.8); }
   .tab-btn.active { color: #fff; border-bottom-color: var(--olive-light); }
 
+  /* PANELS */
   .tab-panel { display: none; padding: 18px 16px 80px; max-width: 780px; margin: 0 auto; }
   .tab-panel.active { display: block; }
 
+  /* LOADING OVERLAY */
   .loading-overlay {
     display: none; position: fixed; inset: 0; background: rgba(24,23,15,0.6);
     z-index: 100; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
@@ -78,16 +83,19 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-overlay p { color: var(--olive-light); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
 
+  /* SECTION LABEL */
   .sec-label {
     font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--olive); border-bottom: 1px solid var(--border); padding-bottom: 7px; margin-bottom: 14px;
   }
 
+  /* STAT CARDS */
   .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
   .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 11px; text-align: center; }
   .stat-num  { font-size: 28px; font-weight: 300; color: var(--black); line-height: 1; margin-bottom: 4px; }
   .stat-lbl  { font-size: 8px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); }
 
+  /* DATE ROW */
   .date-row {
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
     background: var(--white); border: 1px solid var(--border); border-radius: 6px;
@@ -96,6 +104,7 @@
   .date-row label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); }
   .date-row input[type=date] { border: none; background: none; font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--black); outline: none; }
 
+  /* FAMILY BLOCKS */
   .family-block { background: var(--white); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; overflow: hidden; }
   .family-hd {
     display: flex; align-items: center; gap: 10px; padding: 10px 13px;
@@ -114,6 +123,7 @@
   .del-btn     { background: none; border: none; color: rgba(139,58,47,0.3); cursor: pointer; font-size: 18px; padding: 2px 4px; line-height: 1; border-radius: 3px; }
   .del-btn:hover { color: var(--alert); background: var(--alert-bg); }
 
+  /* GUEST SECTION */
   .guest-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
   .guest-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
   .guest-type-card { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
@@ -133,6 +143,7 @@
   }
   .untracked-row label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); flex: 1; }
 
+  /* ALERTS */
   .alert-banner {
     display: flex; gap: 10px; align-items: flex-start;
     background: var(--alert-bg); border: 1px solid rgba(139,58,47,0.22);
@@ -143,6 +154,7 @@
   .alert-text strong { display: block; font-size: 9px; font-weight: 700; color: var(--alert); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
   .alert-text span   { font-size: 12px; color: #7a3028; line-height: 1.5; font-weight: 400; }
 
+  /* BUTTONS */
   .btn { font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 4px; padding: 10px 18px; border: none; transition: background 0.15s; }
   .btn-primary { background: var(--olive); color: #fff; }
   .btn-primary:hover { background: var(--black); }
@@ -153,6 +165,7 @@
   .btn-sm { padding: 5px 10px; font-size: 9px; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  /* INPUTS */
   .rc-input { width: 100%; border: 1px solid var(--border-med); border-radius: 4px; padding: 9px 10px; font-family: var(--font); font-size: 13px; color: var(--black); background: var(--white); outline: none; }
   .rc-input:focus { border-color: var(--olive); }
   .num-input { width: 60px; text-align: center; border: 1px solid var(--border-med); border-radius: 4px; padding: 5px 6px; font-family: var(--font); font-size: 14px; background: var(--cream); color: var(--black); outline: none; }
@@ -160,10 +173,12 @@
   .field-group { margin-bottom: 12px; }
   .field-group label { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); margin-bottom: 4px; }
 
+  /* SAVE ROW */
   .save-row { display: flex; gap: 10px; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
   .status-msg { font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
   .status-msg.show { opacity: 1; }
 
+  /* HISTORY */
   .history-entry { background: var(--white); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
   .history-hd    { display: flex; align-items: center; padding: 10px 13px; background: var(--olive-pale); gap: 10px; flex-wrap: wrap; }
   .history-date  { flex: 1; font-size: 13px; font-weight: 600; color: var(--black); min-width: 160px; }
@@ -176,6 +191,7 @@
   .chip-second   { background: var(--second-bg);  color: var(--second); }
   .chip-lbl      { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-top: 4px; }
 
+  /* METRICS */
   .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .metric-card  { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 14px; }
   .metric-card h3 { font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--olive); margin-bottom: 12px; }
@@ -185,6 +201,7 @@
   .bar-fill  { height: 100%; background: var(--olive); border-radius: 4px; }
   .bar-val   { width: 30px; text-align: right; font-size: 10px; font-weight: 600; color: var(--mid); flex-shrink: 0; }
 
+  /* MODAL */
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; }
   .modal { background: var(--white); border-radius: 8px; padding: 22px; width: 100%; max-width: 380px; border-top: 3px solid var(--olive); }
   .modal h2 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
@@ -202,6 +219,17 @@
 </style>
 </head>
 <body>
+
+        <div style="font-size:10px;color:var(--mid);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;">Attendance Tracker</div>
+      </div>
+    </div>
+    <h2>Connect to Google Sheets</h2>
+    <div class="field-group">
+      <label>Apps Script Web App URL</label>
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="connectAndLoad()">Connect & Load Roster</button>
+  </div>
+</div>
 
 <!-- MAIN APP -->
 <div id="app">
@@ -223,12 +251,12 @@
     <button class="tab-btn"        onclick="switchTab('roster',this)">Roster</button>
     <button class="tab-btn"        onclick="switchTab('history',this)">History</button>
     <button class="tab-btn"        onclick="switchTab('metrics',this)">Metrics</button>
-    <button class="tab-btn"        onclick="switchTab('followup',this)" id="tab-btn-followup">Follow-Up</button>
     <button class="tab-btn"        onclick="switchTab('settings',this)">Settings</button>
   </nav>
 
   <!-- ATTENDANCE -->
   <section id="panel-attendance" class="tab-panel active">
+    <div id="absence-alerts"></div>
     <div class="date-row">
       <label>Sunday</label>
       <input type="date" id="att-date" />
@@ -255,8 +283,11 @@
         </div>
       </div>
       <div class="untracked-row" style="margin-top:10px;">
-        <label>Additional untracked</label>
+        <label>Additional attendees (out of town visitors, hired help, etc.)</label>
         <input type="number" class="num-input" id="extra-count" min="0" value="0" oninput="updateStats()" />
+      </div>
+      <div style="margin-top:8px;">
+        <textarea id="extra-comments" placeholder="Note who the additional attendees were…" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);resize:vertical;min-height:60px;"></textarea>
       </div>
     </div>
     <div class="save-row">
@@ -292,12 +323,6 @@
     <div id="metrics-area"></div>
   </section>
 
-  <!-- FOLLOW-UP -->
-  <section id="panel-followup" class="tab-panel">
-    <div class="sec-label">Follow-Up Needed</div>
-    <div id="followup-list"></div>
-  </section>
-
   <!-- SETTINGS -->
   <section id="panel-settings" class="tab-panel">
     <div class="sec-label">Settings</div>
@@ -318,9 +343,11 @@
 
 <script>
 
+// In-memory state (always loaded fresh from Sheet)
 let families = [];
 let records  = [];
 
+// ── UTILITIES ──────────────────────────────────────────────
 function uid()   { return '_' + Math.random().toString(36).slice(2,10); }
 function today() { return new Date().toISOString().split('T')[0]; }
 function v(id)   { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
@@ -348,6 +375,7 @@ function setSyncStatus(state, msg) {
   el.textContent = msg;
 }
 
+// ── SHEET API ──────────────────────────────────────────────
 async function sheetGet(action) {
   const url = getScriptUrl();
   if (!url) return null;
@@ -358,17 +386,20 @@ async function sheetGet(action) {
 async function sheetPost(payload) {
   const url = getScriptUrl();
   if (!url) return null;
-  await fetch(url, {
+  const resp = await fetch(url, {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
+  // no-cors returns opaque response — assume ok
   return { status: 'ok' };
 }
 
+// ── LOAD ROSTER FROM SHEET ─────────────────────────────────
 async function loadRoster() {
   const data = await sheetGet('getRoster');
   if (!data || !data.rows || data.rows.length < 2) return;
+  // rows: [FamilyID, FamilyName, MemberID, MemberName, Note]
   const famMap = {};
   data.rows.slice(1).forEach(row => {
     const [famId, famName, memId, memName, note] = row;
@@ -379,14 +410,15 @@ async function loadRoster() {
   families = Object.values(famMap);
 }
 
+// ── LOAD RECORDS FROM SHEET ────────────────────────────────
 async function loadRecords() {
   const data = await sheetGet('getRecords');
   if (!data || !data.rows || data.rows.length < 2) return;
-  // A=Timestamp | B=Total Attendance | C=Roster Attendance | D=First Time | E=Second Time | F=First Time Notes | G=Second Time Notes | H=Present Members | I=Time Submitted
+  // Sheet cols: Timestamp | Date | Total Attendance | Roster Present | First Time | Second Time | First Time Names | Second Time Names | Present Members
   records = data.rows.slice(1)
-    .filter(row => row[0])
+    .filter(row => row[1])
     .map(row => {
-      const presentRaw = String(row[7]||'');
+      const presentRaw = String(row[8]||'');
       const present = presentRaw === 'none' ? [] : presentRaw.split(',').map(s=>s.trim()).filter(Boolean);
       const parseGuests = str => {
         if (!str || str === 'none') return [];
@@ -395,20 +427,19 @@ async function loadRecords() {
           return { name: m ? m[1].trim() : s.trim(), note: m && m[2] ? m[2].trim() : '' };
         }).filter(g => g.name);
       };
-      const rawTs = String(row[0]).trim();
-      const dateStr = rawTs ? new Date(rawTs).toISOString().split('T')[0] : '';
       return {
-        date: dateStr,
-        totalAttendance: Number(row[1])||0,
-        rosterPresent:   Number(row[2])||0,
-        firstGuests:     parseGuests(row[5]),
-        secondGuests:    parseGuests(row[6]),
-        presentNames:    present,
+        date: String(row[1]).trim(),
+        totalAttendance: Number(row[2])||0,
+        rosterPresent: Number(row[3])||0,
+        firstGuests:  parseGuests(row[6]),
+        secondGuests: parseGuests(row[7]),
+        presentNames: present,
         extra: 0
       };
     });
 }
 
+// ── SEED ROSTER ───────────────────────────────────────────
 const SEED_ROSTER = [
   { id: 'f01', name: 'Skaggs', members: [
     { id: 'f01m1', name: 'Anthony Skaggs', note: '' },
@@ -447,6 +478,9 @@ const SEED_ROSTER = [
   ]}
 ];
 
+// ── CONNECT & INITIAL LOAD ─────────────────────────────────
+
+
 async function initApp() {
   document.getElementById('app').style.display = 'block';
   showLoading('Loading roster...');
@@ -466,6 +500,7 @@ async function initApp() {
   hideLoading();
 }
 
+// ── TABS ───────────────────────────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -475,33 +510,9 @@ function switchTab(name, btn) {
   if (name === 'roster')     renderRoster();
   if (name === 'history')    renderHistoryTab();
   if (name === 'metrics')    renderMetrics();
-  if (name === 'followup')   renderFollowUp();
 }
 
-function renderFollowUp() {
-  const alerts = getAbsenceAlerts();
-  const btn = document.getElementById('tab-btn-followup');
-  btn.textContent = alerts.length ? `Follow-Up (${alerts.length})` : 'Follow-Up';
-  btn.style.color = alerts.length ? 'var(--alert)' : '';
-  const el = document.getElementById('followup-list');
-  if (!alerts.length) {
-    el.innerHTML = '<div class="empty-state">No members have missed 3 consecutive services. Great turnout!</div>';
-    return;
-  }
-  el.innerHTML = `
-    <div class="info-notice" style="border-left-color:var(--alert);background:var(--alert-bg);color:#7a3028;">
-      The following members have not been checked in for the last 3 recorded services.
-    </div>
-    ${alerts.map(a => `
-      <div class="alert-banner">
-        <span class="alert-icon">&#9888;</span>
-        <div class="alert-text">
-          <strong>Follow Up</strong>
-          <span>${escH(a.name)} — ${escH(a.family)}</span>
-        </div>
-      </div>`).join('')}`;
-}
-
+// ── ABSENCE ALERTS ─────────────────────────────────────────
 function getAbsenceAlerts() {
   const sorted = [...records].sort((a,b) => b.date.localeCompare(a.date));
   if (sorted.length < 3) return [];
@@ -516,11 +527,14 @@ function getAbsenceAlerts() {
   return alerts;
 }
 
+// ── ATTENDANCE TAB ─────────────────────────────────────────
 function renderAttendance() {
-  const alertCount = getAbsenceAlerts().length;
-  const btn = document.getElementById('tab-btn-followup');
-  btn.textContent = alertCount ? `Follow-Up (${alertCount})` : 'Follow-Up';
-  btn.style.color = alertCount ? 'var(--alert)' : '';
+  document.getElementById('absence-alerts').innerHTML = getAbsenceAlerts().map(a => `
+    <div class="alert-banner">
+      <span class="alert-icon">&#9888;</span>
+      <div class="alert-text"><strong>Absence Alert</strong>
+      <span>${escH(a.name)} (${escH(a.family)}) has missed the last 3 services.</span></div>
+    </div>`).join('');
 
   const list = document.getElementById('att-family-list');
   if (!families.length) {
@@ -572,9 +586,9 @@ function syncFamCheck(famId) {
 function updateStats() {
   let present = 0, roster = 0;
   document.querySelectorAll('.mem-check').forEach(cb => { roster++; if (cb.checked) present++; });
-  const extra  = parseInt(document.getElementById('extra-count')?.value) || 0;
-  const first  = document.querySelectorAll('#first-time-rows .guest-row').length;
-  const second = document.querySelectorAll('#second-time-rows .guest-row').length;
+  const extra   = parseInt(document.getElementById('extra-count')?.value) || 0;
+  const first   = document.querySelectorAll('#first-time-rows .guest-row').length;
+  const second  = document.querySelectorAll('#second-time-rows .guest-row').length;
   document.getElementById('stat-present').textContent = present;
   document.getElementById('stat-roster').textContent  = roster;
   document.getElementById('stat-total').textContent   = present + first + second + extra;
@@ -598,29 +612,38 @@ function getGuestRows(cid) {
 async function saveAttendance() {
   const date = document.getElementById('att-date').value;
   if (!date) { alert('Please select a date.'); return; }
+
   const btn = document.getElementById('save-btn');
   btn.disabled = true;
   setSyncStatus('syncing', 'Saving...');
+
   const presentNames = [...document.querySelectorAll('.mem-check:checked')].map(cb => cb.dataset.name);
   const firstGuests  = getGuestRows('first-time-rows');
   const secondGuests = getGuestRows('second-time-rows');
   const extra        = parseInt(document.getElementById('extra-count')?.value) || 0;
+  const extraComments = document.getElementById('extra-comments')?.value.trim() || '';
   const tot = presentNames.length + firstGuests.length + secondGuests.length + extra;
+
   const fn = firstGuests.map(g  => g.name + (g.note ? ' (' + g.note + ')' : '')).join(', ');
   const sn = secondGuests.map(g => g.name + (g.note ? ' (' + g.note + ')' : '')).join(', ');
+
   const payload = {
     action: 'saveAttendance',
     date, totalAttendance: tot, rosterPresent: presentNames.length,
     firstTimeGuests: firstGuests.length, secondTimeGuests: secondGuests.length,
     firstTimerNames: fn || 'none', secondTimerNames: sn || 'none',
-    presentMembers: presentNames.join(', ') || 'none'
+    presentMembers: presentNames.join(', ') || 'none',
+    additionalComments: extraComments || 'none'
   };
+
   try {
     await sheetPost(payload);
+    // update local records cache
     const newRec = { date, totalAttendance: tot, rosterPresent: presentNames.length,
-      firstGuests, secondGuests, presentNames, extra };
+      firstGuests, secondGuests, presentNames, extra, additionalComments: extraComments };
     const idx = records.findIndex(r => r.date === date);
     if (idx >= 0) records[idx] = newRec; else records.push(newRec);
+
     const sm = document.getElementById('save-status');
     sm.style.color = 'var(--success)'; sm.textContent = '✓ Saved to Google Sheet';
     sm.classList.add('show'); setTimeout(() => sm.classList.remove('show'), 3000);
@@ -635,6 +658,7 @@ async function saveAttendance() {
   btn.disabled = false;
 }
 
+// ── ROSTER TAB ─────────────────────────────────────────────
 function renderRoster() {
   const list = document.getElementById('roster-family-list');
   if (!families.length) { list.innerHTML = '<div class="empty-state">No families yet.</div>'; return; }
@@ -724,6 +748,7 @@ async function syncRoster(msg) {
 
 function closeModal() { document.getElementById('modal-host').innerHTML = ''; }
 
+// ── HISTORY TAB ────────────────────────────────────────────
 function renderHistoryTab() {
   const el = document.getElementById('history-list');
   if (!records.length) { el.innerHTML = '<div class="empty-state">No records yet.</div>'; return; }
@@ -746,6 +771,7 @@ function renderHistoryTab() {
   }).join('');
 }
 
+// ── METRICS TAB ────────────────────────────────────────────
 function renderMetrics() {
   const el = document.getElementById('metrics-area');
   if (!records.length) { el.innerHTML = '<div class="empty-state">No records yet.</div>'; return; }
@@ -755,13 +781,17 @@ function renderMetrics() {
   const totF    = records.reduce((a,r) => a + (r.firstGuests||[]).length, 0);
   const totS    = records.reduce((a,r) => a + (r.secondGuests||[]).length, 0);
   const alerts  = getAbsenceAlerts();
+
+  // member attendance count by name
   const cnt = {};
   families.forEach(f => f.members.forEach(m => { cnt[m.name] = 0; }));
   records.forEach(r => (r.presentNames||[]).forEach(n => { if (n in cnt) cnt[n]++; }));
   const top = Object.entries(cnt).map(([name,c]) => ({ name, c, pct: Math.round(c/total*100) }))
     .sort((a,b) => b.c - a.c).slice(0, 10);
+
   const recent = [...records].sort((a,b) => a.date.localeCompare(b.date)).slice(-8);
   const maxT   = Math.max(...recent.map(r => r.totalAttendance||0), 1);
+
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;">
       <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Services</div></div>
@@ -773,25 +803,30 @@ function renderMetrics() {
       <div class="stat-card"><div class="stat-num" style="color:var(--info);">${totF}</div><div class="stat-lbl">Total 1st-Timers</div></div>
       <div class="stat-card"><div class="stat-num" style="color:var(--second);">${totS}</div><div class="stat-lbl">Total 2nd-Timers</div></div>
     </div>
+    ${alerts.length ? `<div style="margin-bottom:16px;"><div class="sec-label">3-Week Absence Alerts</div>${alerts.map(a=>`<div class="alert-banner"><span class="alert-icon">&#9888;</span><div class="alert-text"><strong>Follow Up</strong><span>${escH(a.name)} — ${escH(a.family)}</span></div></div>`).join('')}</div>` : ''}
     <div class="metrics-grid">
       <div class="metric-card"><h3>Attendance Rate</h3>${top.map(m=>`<div class="bar-row"><span class="bar-name" title="${escH(m.name)}">${escH(m.name)}</span><div class="bar-track"><div class="bar-fill" style="width:${m.pct}%"></div></div><span class="bar-val">${m.pct}%</span></div>`).join('')}</div>
       <div class="metric-card"><h3>Recent Totals</h3>${recent.map(r=>{ const t=r.totalAttendance||0; const d=new Date(r.date+'T12:00:00'); return `<div class="bar-row"><span class="bar-name">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(t/maxT*100)}%"></div></div><span class="bar-val">${t}</span></div>`; }).join('')}</div>
     </div>`;
 }
 
+// ── SETTINGS ───────────────────────────────────────────────
+
+
 function exportCSV() {
   if (!records.length) { alert('No records to export.'); return; }
-  const rows = [['Date','Total Attendance','Roster Present','First Time Guests','Second Time Guests','First Timer Names','Second Timer Names','Present Members']];
+  const rows = [['Date','Total Attendance','Roster Present','First Time Guests','Second Time Guests','First Timer Names','Second Timer Names','Present Members','Additional Attendees Comments']];
   [...records].sort((a,b) => a.date.localeCompare(b.date)).forEach(rec => {
     const fn = (rec.firstGuests||[]).map(g=>g.name+(g.note?' ('+g.note+')':'')).join('; ');
     const sn = (rec.secondGuests||[]).map(g=>g.name+(g.note?' ('+g.note+')':'')).join('; ');
-    rows.push([rec.date, rec.totalAttendance||0, rec.rosterPresent||0, (rec.firstGuests||[]).length, (rec.secondGuests||[]).length, fn||'', sn||'', (rec.presentNames||[]).join('; ')||'']);
+    rows.push([rec.date, rec.totalAttendance||0, rec.rosterPresent||0, (rec.firstGuests||[]).length, (rec.secondGuests||[]).length, fn||'', sn||'', (rec.presentNames||[]).join('; ')||'', rec.additionalComments||'']);
   });
   const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download = 'RedemptionAttendance_' + today() + '.csv'; a.click();
 }
 
+// ── INIT ───────────────────────────────────────────────────
 initApp();
 </script>
 </body>
