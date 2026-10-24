@@ -366,7 +366,10 @@ function mostRecentSunday() {
   return d.toISOString().split('T')[0];
 }
 function fmtDate(iso) {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  var s = String(iso).trim();
+  // If it's already YYYY-MM-DD format, append time to avoid timezone shift
+  var d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + 'T12:00:00') : new Date(s);
+  return d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
 }
 function getScriptUrl() { return 'https://script.google.com/macros/s/AKfycby5DdE4bsabg5_4E8jdmM15LOXyWFYowNIIG4dFKjaYV1gJ2QeRSbg8oRGRzXUlB0Uw/exec'; }
 
@@ -518,13 +521,18 @@ function switchTab(name, btn) {
 }
 
 // ── ABSENCE ALERTS ─────────────────────────────────────────
+function parseRecordDate(str) {
+  var s = String(str).trim();
+  // Handle both "2026-05-10" and "Sun May 10 2026 00:00:00 GMT..." formats
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + 'T12:00:00') : new Date(s);
+}
+
 function getAbsenceAlerts() {
   // Find services that occurred in the past 21 calendar days (3 weeks)
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 21);
-  const cutoffStr = cutoff.toISOString().split('T')[0]; // "YYYY-MM-DD"
 
-  const recentRecords = records.filter(rec => rec.date >= cutoffStr);
+  const recentRecords = records.filter(rec => parseRecordDate(rec.date) >= cutoff);
   if (recentRecords.length === 0) return [];
 
   const alerts = [];
@@ -771,7 +779,7 @@ function closeModal() { document.getElementById('modal-host').innerHTML = ''; }
 function renderHistoryTab() {
   const el = document.getElementById('history-list');
   if (!records.length) { el.innerHTML = '<div class="empty-state">No records yet.</div>'; return; }
-  el.innerHTML = [...records].sort((a,b) => b.date.localeCompare(a.date)).map(rec => {
+  el.innerHTML = [...records].sort((a,b) => parseRecordDate(b.date) - parseRecordDate(a.date)).map(rec => {
     const tot = rec.totalAttendance || (rec.presentNames.length + (rec.firstGuests||[]).length + (rec.secondGuests||[]).length + (rec.extra||0));
     const pChips  = (rec.presentNames||[]).map(n => `<span class="chip chip-present">${escH(n)}</span>`).join('');
     const f1Chips = (rec.firstGuests||[]).map(g  => `<span class="chip chip-first">${escH(g.name)}${g.note?' — '+escH(g.note):''}</span>`).join('');
@@ -808,7 +816,7 @@ function renderMetrics() {
   const top = Object.entries(cnt).map(([name,c]) => ({ name, c, pct: Math.round(c/total*100) }))
     .sort((a,b) => b.c - a.c).slice(0, 10);
 
-  const recent = [...records].sort((a,b) => a.date.localeCompare(b.date)).slice(-8);
+  const recent = [...records].sort((a,b) => parseRecordDate(a.date) - parseRecordDate(b.date)).slice(-8);
   const maxT   = Math.max(...recent.map(r => r.totalAttendance||0), 1);
 
   el.innerHTML = `
