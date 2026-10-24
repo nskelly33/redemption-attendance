@@ -494,10 +494,6 @@ async function initApp() {
   showLoading('Loading roster...');
   try {
     await loadRoster();
-    if (families.length === 0) {
-      families = JSON.parse(JSON.stringify(SEED_ROSTER));
-      await sheetPost({ action: 'saveRoster', families });
-    }
     await loadRecords();
   } catch(e) {
     setSyncStatus('err', 'Offline — showing cached data');
