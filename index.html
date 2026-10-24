@@ -251,12 +251,12 @@
     <button class="tab-btn"        onclick="switchTab('roster',this)">Roster</button>
     <button class="tab-btn"        onclick="switchTab('history',this)">History</button>
     <button class="tab-btn"        onclick="switchTab('metrics',this)">Metrics</button>
+    <button class="tab-btn"        onclick="switchTab('absences',this)">Absences</button>
     <button class="tab-btn"        onclick="switchTab('settings',this)">Settings</button>
   </nav>
 
   <!-- ATTENDANCE -->
   <section id="panel-attendance" class="tab-panel active">
-    <div id="absence-alerts"></div>
     <div class="date-row">
       <label>Sunday</label>
       <input type="date" id="att-date" />
@@ -321,6 +321,13 @@
   <section id="panel-metrics" class="tab-panel">
     <div class="sec-label">Attendance Metrics</div>
     <div id="metrics-area"></div>
+  </section>
+
+  <!-- ABSENCES -->
+  <section id="panel-absences" class="tab-panel">
+    <div class="sec-label">Absence Alerts — Past 3 Weeks</div>
+    <div class="info-notice">Roster members listed below have not been marked present in any service during the past 3 calendar weeks (21 days). Consider reaching out to follow up.</div>
+    <div id="absence-alerts"></div>
   </section>
 
   <!-- SETTINGS -->
@@ -511,32 +518,47 @@ function switchTab(name, btn) {
   if (name === 'roster')     renderRoster();
   if (name === 'history')    renderHistoryTab();
   if (name === 'metrics')    renderMetrics();
+  if (name === 'absences')   renderAbsences();
 }
 
 // ── ABSENCE ALERTS ─────────────────────────────────────────
 function getAbsenceAlerts() {
-  const sorted = [...records].sort((a,b) => b.date.localeCompare(a.date));
-  if (sorted.length < 3) return [];
-  const last3 = sorted.slice(0, 3);
+  // Find services that occurred in the past 21 calendar days (3 weeks)
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 21);
+  const cutoffStr = cutoff.toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+  const recentRecords = records.filter(rec => rec.date >= cutoffStr);
+  if (recentRecords.length === 0) return [];
+
   const alerts = [];
   families.forEach(fam => {
     fam.members.forEach(mem => {
-      const absentAll = last3.every(rec => !rec.presentNames.includes(mem.name));
+      const absentAll = recentRecords.every(rec => !rec.presentNames.includes(mem.name));
       if (absentAll) alerts.push({ name: mem.name, family: fam.name });
     });
   });
   return alerts;
 }
 
-// ── ATTENDANCE TAB ─────────────────────────────────────────
-function renderAttendance() {
-  document.getElementById('absence-alerts').innerHTML = getAbsenceAlerts().map(a => `
+// ── ABSENCES TAB ───────────────────────────────────────────
+function renderAbsences() {
+  const alerts = getAbsenceAlerts();
+  const el = document.getElementById('absence-alerts');
+  if (!alerts.length) {
+    el.innerHTML = '<div class="empty-state">No absence alerts — everyone has been present in the past 3 weeks.</div>';
+    return;
+  }
+  el.innerHTML = alerts.map(a => `
     <div class="alert-banner">
       <span class="alert-icon">&#9888;</span>
       <div class="alert-text"><strong>Absence Alert</strong>
-      <span>${escH(a.name)} (${escH(a.family)}) has missed the last 3 services.</span></div>
+      <span>${escH(a.name)} (${escH(a.family)}) has not attended in the past 3 weeks.</span></div>
     </div>`).join('');
+}
 
+// ── ATTENDANCE TAB ─────────────────────────────────────────
+function renderAttendance() {
   const list = document.getElementById('att-family-list');
   if (!families.length) {
     list.innerHTML = '<div class="empty-state">No families yet — add them in the Roster tab.</div>';
